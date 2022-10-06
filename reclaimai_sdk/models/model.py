@@ -1,5 +1,5 @@
 from reclaimai_sdk.client import ReclaimClient
-from contextlib import contextmanager
+from httpx import HTTPError
 
 
 class ReclaimModel(object):
@@ -14,34 +14,46 @@ class ReclaimModel(object):
     _client = ReclaimClient()
     _default_params = {}
 
+    def __init__(self, id: int = None, data: dict = {}, **kwargs) -> None:
+        self._data = data
+
     def __repr__(self) -> str:
         return f"{self._name} ({self.id} - {self.name})"
 
     def __str__(self) -> str:
         return f"{self.name}"
 
-    def __init__(self, id: int = None, data: dict = {}, **kwargs) -> None:
-        self._data = data
-        self.autosave = kwargs.get("autosave", True)
-
     def __getitem__(self, key):
+        """
+        Get a value from the data dictionary.
+        """
         return self._data.get(key, None)
 
     def __setitem__(self, key, value):
         """
-        Set a value in the data dictionary and sync the object.
+        Set a value in the data dictionary.
         """
         self._data[key] = value
-        if self.autosave:
-            self.save()
 
     def __delitem__(self, key):
         """
-        Delete a key from the data dictionary and sync the object.
+        Delete a key from the data dictionary.
         """
         del self._data[key]
-        if self.autosave:
-            self.save()
+
+    def __eq__(self, __o: object) -> bool:
+        """
+        The objects are equal if they have the same ID and type.
+        """
+        return self.id == __o.id and self.__class__ == __o.__class__
+
+    # Make it possible to use the object as a context manager
+    # and automatically save the object to the API when exiting the context.
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.save()
 
     @classmethod
     def query_params(cls, **kwargs):
@@ -68,8 +80,13 @@ class ReclaimModel(object):
     @classmethod
     def search(cls, **kwargs):
         """
-        Search for objects with the given query filter.
-        The kwargs fill be used to filter the results.
+        Search for objects. The given keyword arguments are used as
+        filter parameters. Only equal filters are supported (==).
+
+        FIXME: Make the search more flexible and support more operators.
+               As this is reverse engineered from the API, we don't know
+               what is supported and if there is a search syntax for
+               more complex queries in the query parameters.
         """
         results = []
         res = cls._client.get(cls._endpoint, params=cls.query_params())
@@ -89,10 +106,18 @@ class ReclaimModel(object):
         """
         Get a specific object by ID.
         """
-        res = cls._client.get(
-            f"{cls._endpoint}/{id}", params=cls.query_params(**kwargs)
-        )
-        res.raise_for_status()
+
+        try:
+            res = cls._client.get(
+                f"{cls._endpoint}/{id}", params=cls.query_params(**kwargs)
+            )
+            res.raise_for_status()
+
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise ValueError(f"{cls._name} with ID {id} not found.")
+            else:
+                raise e
 
         return cls(data=res.json())
 
@@ -119,8 +144,24 @@ class ReclaimModel(object):
         """
         self._ensure_defaults()
 
-        res = self._client.post(self._endpoint, json=self._data, params=kwargs)
-        res.raise_for_status()
+        try:
+            res = self._client.post(
+                self._endpoint, json=self._data, params=kwargs
+            )
+            res.raise_for_status()
+
+        except HTTPError as e:
+            if e.response.status_code == 400:
+                raise ValueError(f"Invalid {self._name} object.")
+
+            elif e.response.status_code == 500:
+                raise ValueError(
+                    f"Internal server error. {self._name} not created."
+                )
+
+            else:
+                raise e
+
         self._data = res.json()
 
     def _update(self, **kwargs):
@@ -129,12 +170,28 @@ class ReclaimModel(object):
         """
         self._ensure_defaults()
 
-        res = self._client.put(
-            f"{self._endpoint}/{self.id}",
-            json=self._data,
-            params=kwargs,
-        )
-        res.raise_for_status()
+        try:
+            res = self._client.put(
+                f"{self._endpoint}/{self.id}",
+                json=self._data,
+                params=kwargs,
+            )
+            res.raise_for_status()
+
+        except HTTPError as e:
+            if e.response.status_code == 400:
+                raise ValueError(f"Invalid {self._name} object.")
+
+            elif e.response.status_code == 404:
+                raise ValueError(f"{self._name} with ID {self.id} not found.")
+
+            elif e.response.status_code == 500:
+                raise ValueError(
+                    f"Internal server error. {self._name} not updated."
+                )
+            else:
+                raise e
+
         self._data = res.json()
 
     def save(self, **kwargs):
@@ -147,28 +204,6 @@ class ReclaimModel(object):
             self._create(**kwargs)
         else:
             self._update(**kwargs)
-
-    @contextmanager
-    def postpone_save(self):
-        """
-        A context manager that temporarily disables the autosave feature
-        and performs a manual save at the end of the context.
-        """
-        autosave = self.autosave
-        self.autosave = False
-        yield self
-        self.save()
-        self.autosave = autosave
-
-    @contextmanager
-    def disable_save(self):
-        """
-        A context manager that temporarily disables the autosave feature.
-        """
-        autosave = self.autosave
-        self.autosave = False
-        yield self
-        self.autosave = autosave
 
     def delete(self, **kwargs):
         """

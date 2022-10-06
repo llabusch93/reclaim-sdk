@@ -25,21 +25,26 @@ class ReclaimClient(Client):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, **kwargs):
+    def __init__(self, token="", **kwargs):
         super().__init__(base_url=self._api_url, http2=True)
 
-        if "token" in kwargs:
-            self._token = kwargs["token"]
+        if token:
+            self._token = token
 
         elif "RECLAIM_TOKEN" in environ:
             self._token = environ["RECLAIM_TOKEN"]
 
         elif CONF_FILE.exists():
-            config = toml.load(CONF_FILE)
-            self._token = config["reclaim_ai"]["token"]
+            try:
+                self._token = toml.load(CONF_FILE)["reclaim_ai"]["token"]
+            except KeyError:
+                raise KeyError(f"Token not found in {CONF_FILE}.")
 
         if self._token:
             self.authenticate(self._token)
+
+        else:
+            raise ValueError("No Reclaim.ai token provided.")
 
     def authenticate(self, token):
         """

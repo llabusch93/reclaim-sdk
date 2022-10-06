@@ -16,15 +16,14 @@ class TestScheduledDates(ReclaimTestCase):
         correctly
         """
 
-        with self.test_task.postpone_save():
+        with self.test_task as task:
 
             # Setting the start date to in 10 days
-            self.test_task.start_date = datetime.now() + timedelta(days=10)
+            task.start_date = datetime.now() + timedelta(days=10)
             # Setting the due date to in 15 days
-            self.test_task.due_date = datetime.now() + timedelta(days=15)
-
+            task.due_date = datetime.now() + timedelta(days=15)
             # Set the duration to 8 hours
-            self.test_task.duration = 8
+            task.duration = 8
 
         # Checking if the scheduled dates are already set
         while not self.test_task.scheduled_end_date:

@@ -233,3 +233,13 @@ class ReclaimTask(ReclaimModel):
         res.raise_for_status()
 
         self._data = res.json()["taskOrHabit"]
+
+    @classmethod
+    def prioritize_by_due(cls) -> None:
+        """
+        Triggers the auto-prioritization of tasks at Reclaim.ai to sort them
+        by due date.
+        """
+        url = f"{cls._client._api_url}/api/tasks/reindex-by-due"
+        res = cls._client.patch(url)
+        res.raise_for_status()

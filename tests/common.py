@@ -8,13 +8,13 @@ class ReclaimTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ReclaimClient()
-        cls.test_task = ReclaimTask(
+
+        with ReclaimTask(
             data={
                 "title": "test_task_12345",
-                "eventCategory": "WORK",
             }
-        )
+        ) as task:
+            cls.test_task = task
 
     @classmethod
     def tearDownClass(cls):

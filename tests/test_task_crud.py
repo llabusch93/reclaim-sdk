@@ -7,18 +7,16 @@ class TestTaskCRUD(ReclaimTestCase):
         """
         Tests the creation of a task at reclaim.ai
         """
-
-        self.test_task.is_work_task = False
         self.assertTrue(self.test_task.id is not None)
 
-        with self.test_task.postpone_save():
+        with self.test_task as task:
             # We set the date fields and the duration
-            self.test_task.duration = 10
-            self.test_task.start_date = "2050-01-01T07:00:00.000Z"
-            self.test_task.due_date = "2050-01-31T17:00:00.000Z"
-            self.test_task.min_work_duration = 0.75
-            self.test_task.max_work_duration = 1.5
-            self.test_task.description = "This is a test task"
+            task.duration = 10
+            task.start_date = "2050-01-01T07:00:00.000Z"
+            task.due_date = "2050-01-31T17:00:00.000Z"
+            task.min_work_duration = 0.75
+            task.max_work_duration = 1.5
+            task.description = "This is a test task"
 
         # We check if the task was saved correctly
         self.assertEqual(self.test_task.duration, 10)
@@ -37,6 +35,5 @@ class TestTaskCRUD(ReclaimTestCase):
         task_id = self.test_task.id
         self.test_task.delete()
 
-        # This should raise an 404 - Not Found error
-        with self.assertRaises(HTTPError):
+        with self.assertRaises(ValueError):
             self.test_task.get(task_id)
