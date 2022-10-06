@@ -1,5 +1,4 @@
 from tests.common import ReclaimTestCase
-from httpx._exceptions import HTTPError
 
 
 class TestTaskCRUD(ReclaimTestCase):
@@ -14,8 +13,8 @@ class TestTaskCRUD(ReclaimTestCase):
             task.duration = 10
             task.start_date = "2050-01-01T07:00:00.000Z"
             task.due_date = "2050-01-31T17:00:00.000Z"
-            task.min_work_duration = 0.75
-            task.max_work_duration = 1.5
+            task.min_work_duration = 0.78
+            task.max_work_duration = 1.62
             task.description = "This is a test task"
 
         # We check if the task was saved correctly

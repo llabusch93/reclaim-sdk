@@ -114,11 +114,17 @@ class ReclaimTask(ReclaimModel):
         else:
             self["snoozeUntil"] = from_datetime(value)
 
+    def _convert_to_timechunks(self, hours: int) -> int:
+        """
+        Converts the hours to time chunks and returns the number of
+        time chunks rounded up.
+        """
+        return round((hours * 60) / 15)
+
     @property
     def min_work_duration(self) -> int:
         """
         Gets the minimum duration of the task working chunks in hours.
-        One working chunk is 15 minutes, so 4 working chunks are 1 hour.
         """
         working_chunks = self["minChunkSize"]
         if working_chunks:
@@ -126,12 +132,12 @@ class ReclaimTask(ReclaimModel):
         return None
 
     @min_work_duration.setter
-    def min_work_duration(self, value: int) -> None:
+    def min_work_duration(self, hours: float) -> None:
         """
         Sets the minimum duration of the task working chunks in hours.
         One working chunk is 15 minutes, so 4 working chunks are 1 hour.
         """
-        self["minChunkSize"] = value * 4
+        self["minChunkSize"] = self._convert_to_timechunks(hours)
 
     @property
     def max_work_duration(self) -> int:
@@ -145,12 +151,12 @@ class ReclaimTask(ReclaimModel):
         return None
 
     @max_work_duration.setter
-    def max_work_duration(self, value: int) -> None:
+    def max_work_duration(self, hours: float) -> None:
         """
         Sets the maximum duration of the task working chunks in hours.
         One working chunk is 15 minutes, so 4 working chunks are 1 hour.
         """
-        self["maxChunkSize"] = value * 4
+        self["maxChunkSize"] = self._convert_to_timechunks(hours)
 
     @property
     def duration(self) -> int:
@@ -163,11 +169,11 @@ class ReclaimTask(ReclaimModel):
         return None
 
     @duration.setter
-    def duration(self, value: int) -> None:
+    def duration(self, hours: float) -> None:
         """
         Sets the duration of the task in hours.
         """
-        self["timeChunksRequired"] = value * 4
+        self["timeChunksRequired"] = self._convert_to_timechunks(hours)
 
     @property
     def instances(self) -> list:
