@@ -1,7 +1,7 @@
 from setuptools import setup, find_namespace_packages
 
 # Load the requirements from the requirements.txt file
-with open("requirements.txt") as f:
+with open("requirements.txt", "r") as f:
     requirements = f.read().splitlines()
 
 # Read the README.md file for the long description
@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="reclaimai-sdk",
-    version="0.1",
+    version="0.1.1",
     description="Unofficial Reclaim.ai Python API",
     long_description=long_description,
     long_description_content_type="text/markdown",

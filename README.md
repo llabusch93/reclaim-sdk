@@ -59,6 +59,10 @@ task.due_date = datetime.now() + timedelta(days=5)
 
 # Then the object needs to be saved manually to the API.
 task.save()
+
+# If you want to let Reclaim.ai the priorities according to the due date, you can do so by triggering the auto prioritize method.
+
+ReclaimTask.prioritize_by_due()
 ```
 
 ### Updating and searching tasks
