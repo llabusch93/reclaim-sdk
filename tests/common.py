@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from reclaimai_sdk.client import ReclaimClient
 from reclaimai_sdk.models.task import ReclaimTask
 
 

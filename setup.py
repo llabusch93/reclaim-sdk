@@ -14,6 +14,7 @@ setup(
     version="0.1",
     description="Unofficial Reclaim.ai Python API",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/llabusch93/reclaimai-sdk",
     author="Laurence Lars Labusch",
     author_email="llabusch@labusch-it.com",
