@@ -3,7 +3,7 @@ from os import environ
 import pathlib
 import toml
 
-CONF_FILE = pathlib.Path("~/.reclaimai.toml").expanduser()
+CONF_FILE = pathlib.Path("~/.reclaim.toml").expanduser()
 
 
 class ReclaimClient(Client):

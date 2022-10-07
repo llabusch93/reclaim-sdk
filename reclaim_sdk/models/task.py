@@ -1,5 +1,5 @@
-from reclaimai_sdk.models.model import ReclaimModel
-from reclaimai_sdk.utils import to_datetime, from_datetime
+from reclaim_sdk.models.model import ReclaimModel
+from reclaim_sdk.utils import to_datetime, from_datetime
 from datetime import datetime
 
 

@@ -10,12 +10,12 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name="reclaimai-sdk",
-    version="0.1.1",
+    name="reclaim-sdk",
+    version="0.2",
     description="Unofficial Reclaim.ai Python API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/llabusch93/reclaimai-sdk",
+    url="https://github.com/llabusch93/reclaim-sdk",
     author="Laurence Lars Labusch",
     author_email="llabusch@labusch-it.com",
     license="MIT",

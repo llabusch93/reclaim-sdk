@@ -1,4 +1,4 @@
-# reclaimai-sdk - Unofficial Reclaim.ai Python SDK
+# reclaim-sdk - Unofficial Reclaim.ai Python SDK
 
 This is an unofficial Python SDK for the Reclaim.ai API. It is not affiliated with Reclaim.ai in any way and was reverse engineered from the Reclaim.ai web app.
 That means there can be bugs and the API may change at any time, a versioning is not possible.
@@ -9,7 +9,7 @@ That means there can be bugs and the API may change at any time, a versioning is
 ## Installation
 
 ```bash
-pip install reclaimai-sdk
+pip install reclaim-sdk
 ```
 
 ## Configuration
@@ -19,7 +19,7 @@ There are 3 ways to configure the token:
 
 1. You can initiate the `ReclaimClient` class with the token as the `token` argument. As `ReclaimClient` is a singleton, you should initiate this class at the beginning of your script / program. It will be used for all subsequent calls.
 2. You can set the environment variable `RECLAIM_TOKEN` to the token.
-3. You can store the token in a toml file named `.reclaimai.toml` in your home directory. It should look like this:
+3. You can store the token in a toml file named `.reclaim.toml` in your home directory. It should look like this:
 
 ```toml
 [reclaim_ai]
@@ -31,7 +31,7 @@ All CRUD operations are supported, but for now only tasks are implemented. Never
 
 ### Creating a task
 ```python
-from reclaimai_sdk.models.task import ReclaimTask
+from reclaim_sdk.models.task import ReclaimTask
 from datetime import datetime, timedelta
 
 # The objects can be used as context managers, so they will automatically
@@ -67,7 +67,7 @@ ReclaimTask.prioritize_by_due()
 
 ### Updating and searching tasks
 ```python
-from reclaimai_sdk.models.task import ReclaimTask
+from reclaim_sdk.models.task import ReclaimTask
 
 # By default the search method returns all tasks except archived ones
 # (marked as completed)
@@ -89,7 +89,7 @@ task = ReclaimTask.get(12345)
 
 ### Deleting tasks
 ```python
-from reclaimai_sdk.models.task import ReclaimTask
+from reclaim_sdk.models.task import ReclaimTask
 
 # Get the desired task
 task = ReclaimTask.get(12345)

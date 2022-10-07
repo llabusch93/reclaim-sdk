@@ -1,4 +1,4 @@
-from reclaimai_sdk.client import ReclaimClient
+from reclaim_sdk.client import ReclaimClient
 from httpx import HTTPError
 
 

@@ -1,5 +1,5 @@
 from datetime import datetime
-from reclaimai_sdk import RECLAIM_DATETIME_FORMAT, TZ
+from reclaim_sdk import RECLAIM_DATETIME_FORMAT, TZ
 from datetime import datetime, timezone
 from dateutil.parser import parse
 

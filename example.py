@@ -1,4 +1,4 @@
-from reclaimai_sdk.models.task import ReclaimTask
+from reclaim_sdk.models.task import ReclaimTask
 
 # Get the desired task
 task = ReclaimTask.get(12345)
