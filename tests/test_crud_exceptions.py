@@ -1,6 +1,5 @@
 from tests.common import ReclaimTestCase
-
-from httpx import HTTPError
+from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord
 
 
 class TestCrudExceptions(ReclaimTestCase):
@@ -12,14 +11,14 @@ class TestCrudExceptions(ReclaimTestCase):
         """
         Tests the behavior of the get method when the id is wrong.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RecordNotFound):
             self.test_task.get(0)
 
     def test_save_wrong_id(self):
         """
         Tests the behavior of the save method when the id is wrong.
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RecordNotFound):
             self.test_task._data["id"] = 0
             self.test_task.save()
 
@@ -35,9 +34,9 @@ class TestCrudExceptions(ReclaimTestCase):
         """
         Tests the behavior of the save method when the object is invalid.
         """
-        with self.assertRaises(ValueError):
-            id = self.test_task.id
 
+        with self.assertRaises(InvalidRecord):
+            id = self.test_task.id
             # This is too less information so the API get an
             # Internal Server Error.
             self.test_task._data = {"id": id, "title": "Test Task"}

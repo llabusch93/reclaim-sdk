@@ -1,6 +1,8 @@
-from reclaim_sdk.models.model import ReclaimModel
-from reclaim_sdk.utils import to_datetime, from_datetime
 from datetime import datetime
+
+from reclaim_sdk.client import ReclaimAPICall
+from reclaim_sdk.models.model import ReclaimModel
+from reclaim_sdk.utils import from_datetime, to_datetime
 
 
 class ReclaimTask(ReclaimModel):
@@ -224,9 +226,10 @@ class ReclaimTask(ReclaimModel):
         """
         Marks the task as complete.
         """
-        url = f"{self._client._api_url}/api/planner/done/task/{self.id}"
-        res = self._client.post(url)
-        res.raise_for_status()
+        with ReclaimAPICall(self) as client:
+            url = f"{client._api_url}/api/planner/done/task/{self.id}"
+            res = client.post(url)
+            res.raise_for_status()
 
         self._data = res.json()["taskOrHabit"]
 
@@ -234,9 +237,10 @@ class ReclaimTask(ReclaimModel):
         """
         Marks the task as incomplete.
         """
-        url = f"{self._client._api_url}/api/planner/unarchive/task/{self.id}"
-        res = self._client.post(url)
-        res.raise_for_status()
+        with ReclaimAPICall(self) as client:
+            url = f"{client._api_url}/api/planner/unarchive/task/{self.id}"
+            res = client.post(url)
+            res.raise_for_status()
 
         self._data = res.json()["taskOrHabit"]
 
@@ -246,6 +250,7 @@ class ReclaimTask(ReclaimModel):
         Triggers the auto-prioritization of tasks at Reclaim.ai to sort them
         by due date.
         """
-        url = f"{cls._client._api_url}/api/tasks/reindex-by-due"
-        res = cls._client.patch(url)
-        res.raise_for_status()
+        with ReclaimAPICall(cls) as client:
+            url = f"{client._api_url}/api/tasks/reindex-by-due"
+            res = client.post(url)
+            res.raise_for_status()

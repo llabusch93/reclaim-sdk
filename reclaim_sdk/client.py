@@ -1,7 +1,9 @@
-from httpx import Client
-from os import environ
 import pathlib
+from os import environ
+
 import toml
+from httpx import Client, HTTPStatusError
+from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord
 
 CONF_FILE = pathlib.Path("~/.reclaim.toml").expanduser()
 
@@ -51,3 +53,46 @@ class ReclaimClient(Client):
         Authenticate the client with the given token.
         """
         self.cookies.set("RECLAIM", self._token)
+
+
+class ReclaimAPICall(object):
+    """
+    Context manager for API calls to Reclaim.ai.
+    It will catch any HTTPError and raise a ReclaimAPIError instead.
+    """
+
+    def __init__(self, object, id=None, **kwargs):
+        """
+        Initialize the API call context manager.
+
+        :param object (ReclaimModel): The object to call the API on.
+        :param id (int): The ID of the object to call the API on.
+        :param kwargs: Additional keyword arguments to pass to the client.
+        """
+        self.object = object
+        self.object_id = id
+        self.client = ReclaimClient(**kwargs)
+
+    def __enter__(self):
+        return self.client
+
+    def __exit__(self, exc_type, exc_value, traceback):
+
+        if exc_type is HTTPStatusError:
+
+            if exc_value.response.status_code == 404:
+                if self.object_id is not None:
+                    id = self.object_id
+                else:
+                    id = self.object.id
+                raise RecordNotFound(
+                    f"{self.object._name} with ID {id} not found."
+                )
+
+            elif exc_value.response.status_code in (400, 422, 500):
+                raise InvalidRecord(
+                    f"The submitted {self.object._name} is invalid."
+                )
+
+            else:
+                raise exc_value

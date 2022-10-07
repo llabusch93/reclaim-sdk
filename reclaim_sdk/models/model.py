@@ -1,5 +1,4 @@
-from reclaim_sdk.client import ReclaimClient
-from httpx import HTTPError
+from reclaim_sdk.client import ReclaimAPICall
 
 
 class ReclaimModel(object):
@@ -11,7 +10,6 @@ class ReclaimModel(object):
     _endpoint = None
     _name = None
     _required_fields = []
-    _client = ReclaimClient()
     _default_params = {}
 
     def __init__(self, id: int = None, data: dict = {}, **kwargs) -> None:
@@ -88,9 +86,11 @@ class ReclaimModel(object):
                what is supported and if there is a search syntax for
                more complex queries in the query parameters.
         """
+        with ReclaimAPICall(cls) as client:
+            res = client.get(cls._endpoint, params=cls.query_params())
+            res.raise_for_status()
+
         results = []
-        res = cls._client.get(cls._endpoint, params=cls.query_params())
-        res.raise_for_status()
 
         for item in res.json():
             results.append(cls(data=item))
@@ -107,17 +107,11 @@ class ReclaimModel(object):
         Get a specific object by ID.
         """
 
-        try:
-            res = cls._client.get(
-                f"{cls._endpoint}/{id}", params=cls.query_params(**kwargs)
+        with ReclaimAPICall(cls, id=id) as client:
+            res = client.get(
+                f"{cls._endpoint}/{id}", params=cls.query_params()
             )
             res.raise_for_status()
-
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                raise ValueError(f"{cls._name} with ID {id} not found.")
-            else:
-                raise e
 
         return cls(data=res.json())
 
@@ -144,23 +138,9 @@ class ReclaimModel(object):
         """
         self._ensure_defaults()
 
-        try:
-            res = self._client.post(
-                self._endpoint, json=self._data, params=kwargs
-            )
+        with ReclaimAPICall(self) as client:
+            res = client.post(self._endpoint, json=self._data, params=kwargs)
             res.raise_for_status()
-
-        except HTTPError as e:
-            if e.response.status_code == 400:
-                raise ValueError(f"Invalid {self._name} object.")
-
-            elif e.response.status_code == 500:
-                raise ValueError(
-                    f"Internal server error. {self._name} not created."
-                )
-
-            else:
-                raise e
 
         self._data = res.json()
 
@@ -170,27 +150,13 @@ class ReclaimModel(object):
         """
         self._ensure_defaults()
 
-        try:
-            res = self._client.put(
+        with ReclaimAPICall(self) as client:
+            res = client.put(
                 f"{self._endpoint}/{self.id}",
                 json=self._data,
                 params=kwargs,
             )
             res.raise_for_status()
-
-        except HTTPError as e:
-            if e.response.status_code == 400:
-                raise ValueError(f"Invalid {self._name} object.")
-
-            elif e.response.status_code == 404:
-                raise ValueError(f"{self._name} with ID {self.id} not found.")
-
-            elif e.response.status_code == 500:
-                raise ValueError(
-                    f"Internal server error. {self._name} not updated."
-                )
-            else:
-                raise e
 
         self._data = res.json()
 
@@ -209,9 +175,10 @@ class ReclaimModel(object):
         """
         Delete the object.
         """
-        res = self._client.delete(
-            f"{self._endpoint}/{self.id}", params=self.query_params()
-        )
-        res.raise_for_status()
+
+        with ReclaimAPICall(self) as client:
+            res = client.delete(f"{self._endpoint}/{self.id}", params=kwargs)
+            res.raise_for_status()
+
         self._data = {}
         return True

@@ -1,10 +1,11 @@
 from tests.common import ReclaimTestCase
+from reclaim_sdk.exceptions import RecordNotFound
 
 
 class TestTaskCRUD(ReclaimTestCase):
-    def test_task_creation(self):
+    def test_task_crud(self):
         """
-        Tests the creation of a task at reclaim.ai
+        Tests the CRUD operations of a task at reclaim.ai
         """
         self.assertTrue(self.test_task.id is not None)
 
@@ -34,5 +35,5 @@ class TestTaskCRUD(ReclaimTestCase):
         task_id = self.test_task.id
         self.test_task.delete()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(RecordNotFound):
             self.test_task.get(task_id)
