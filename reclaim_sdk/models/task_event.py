@@ -1,7 +1,8 @@
 from datetime import datetime
 
+from reclaim_sdk.client import ReclaimAPICall
 from reclaim_sdk.models.model import ReclaimModel
-from reclaim_sdk.utils import to_datetime
+from reclaim_sdk.utils import to_datetime, from_datetime
 
 
 class ReclaimTaskEvent(ReclaimModel):
@@ -13,6 +14,7 @@ class ReclaimTaskEvent(ReclaimModel):
 
     _name = "Task Event"
     _required_fields = ["start", "end"]
+    _endpoint = "/api/planner/event/move"
 
     def __init__(self, data: dict, task, **kwargs) -> None:
         super().__init__(data, **kwargs)
@@ -26,13 +28,17 @@ class ReclaimTaskEvent(ReclaimModel):
     def start(self) -> datetime:
         return to_datetime(self["start"])
 
+    @start.setter
+    def start(self, value: datetime):
+        self._data["start"] = from_datetime(value)
+
     @property
     def end(self) -> datetime:
         return to_datetime(self["end"])
 
-    @property
-    def pinned(self) -> bool:
-        return self["pinned"]
+    @end.setter
+    def end(self, value: datetime):
+        self._data["end"] = from_datetime(value)
 
     def _create(self, **kwargs):
         """
@@ -40,17 +46,26 @@ class ReclaimTaskEvent(ReclaimModel):
         """
         raise NotImplementedError("Task Events cannot be created by the user.")
 
+    def delete(self, **kwargs):
+        """
+        Task Event cannot be deleted by the user.
+        """
+        raise NotImplementedError("Task Events cannot be deleted by the user.")
+
     def _update(self, **kwargs):
         """
-        Updates the task event. Only the start and end times (event move) or
-        pinned status (event pin) can be updated.
+        Updates the task event. Only the start and end times (event move).
         """
-        # TODO: Implement the special update logic for task events.
-        raise NotImplementedError()
+        params = {
+            **kwargs,
+            "start": self["start"],
+            "end": self["end"],
+        }
+        with ReclaimAPICall(self) as client:
+            res = client.post(
+                f"{self._endpoint}/{self.id}",
+                params=params,
+            )
+            res.raise_for_status()
 
-    def _delete(self, **kwargs):
-        """
-        Deletes the task event.
-        """
-        # TODO: Implement the special delete logic for task events.
-        raise NotImplementedError()
+        self._data = res.json()["events"][0]
