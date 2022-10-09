@@ -183,9 +183,23 @@ class ReclaimTask(ReclaimModel):
         self["timeChunksRequired"] = self._convert_to_timechunks(hours)
 
     @property
+    def priority(self) -> int:
+        """
+        Gets the priority of the task. A lower value means higher priority.
+        """
+        return self["index"]
+
+    @priority.setter
+    def priority(self, value: int) -> None:
+        """
+        Sets the priority of the task. A lower value means higher priority.
+        """
+        self["index"] = value
+
+    @property
     def events(self) -> list:
         """
-        Parses and sets the task events.
+        Parses and sets the task events, sorted by start date.
         """
         if not self["instances"]:
             return []
@@ -193,6 +207,8 @@ class ReclaimTask(ReclaimModel):
         events = []
         for event in self["instances"]:
             events.append(ReclaimTaskEvent(event, self))
+
+        events = sorted(events, key=lambda x: x.start)
 
         return events
 
@@ -204,12 +220,10 @@ class ReclaimTask(ReclaimModel):
         scheduled to start in the Reclaim.ai planner.
         The timezone is UTC.
         """
-        if not self.is_scheduled or not self.events:
+        if not self.events:
             return None
 
-        # Sort the events by start date
-        events = sorted(self.events, key=lambda x: x["start"])
-        return events[0].start
+        return self.events[0].start
 
     @property
     def scheduled_end_date(self) -> datetime:
@@ -219,12 +233,10 @@ class ReclaimTask(ReclaimModel):
         scheduled to end in the Reclaim.ai planner.
         The timezone is UTC.
         """
-        if not self.is_scheduled or not self.events:
+        if not self.events:
             return None
 
-        # Sort the events by end date
-        events = sorted(self.events, key=lambda x: x["end"])
-        return events[-1].end
+        return self.events[0].end
 
     def mark_complete(self) -> None:
         """
@@ -256,5 +268,14 @@ class ReclaimTask(ReclaimModel):
         """
         with ReclaimAPICall(cls) as client:
             url = f"{client._api_url}/api/tasks/reindex-by-due"
+            res = client.post(url)
+            res.raise_for_status()
+
+    def prioritize(self) -> None:
+        """
+        Sets the task on top of the task list.
+        """
+        with ReclaimAPICall(self) as client:
+            url = f"{client._api_url}/api/planner/prioritize/task/{self.id}"
             res = client.post(url)
             res.raise_for_status()

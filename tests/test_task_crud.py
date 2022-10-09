@@ -31,6 +31,11 @@ class TestTaskCRUD(ReclaimTestCase):
         self.test_task.mark_incomplete()
         self.assertNotEqual(self.test_task["status"], "ARCHIVED")
 
+        priority_before = self.test_task.priority
+        self.test_task.prioritize()
+        self.test_task.update()
+        self.assertLess(self.test_task.priority, priority_before)
+
         # We delete the task again and check if it was deleted
         task_id = self.test_task.id
         self.test_task.delete()
