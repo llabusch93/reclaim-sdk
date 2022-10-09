@@ -12,7 +12,7 @@ class ReclaimModel(object):
     _required_fields = []
     _default_params = {}
 
-    def __init__(self, id: int = None, data: dict = {}, **kwargs) -> None:
+    def __init__(self, data: dict = {}, **kwargs) -> None:
         self._data = data
 
     def __repr__(self) -> str:
@@ -64,16 +64,19 @@ class ReclaimModel(object):
         return params
 
     @property
+    def id(self):
+        """
+        The ID of the object. Must be implemented by the subclass.
+        """
+        raise NotImplementedError("Must be implemented by subclass.")
+
+    @property
     def name(self):
         raise NotImplementedError()
 
     @name.setter
     def name(self, value):
         raise NotImplementedError()
-
-    @property
-    def id(self):
-        return self._data.get("id", None)
 
     @classmethod
     def search(cls, **kwargs):

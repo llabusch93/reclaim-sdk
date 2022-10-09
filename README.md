@@ -27,7 +27,7 @@ token = <YOUR_TOKEN>
 ```
 
 ## Usage
-All CRUD operations are supported, but for now only tasks are implemented. Nevertheless the API is designed to be easily extendable, by adding new classes for other resources. All "heavy lifting" is done in the `ReclaimModel` class, which is the base class for all other models.
+All CRUD operations are supported, but for now only tasks are implemented. For the linked task events only the update of start and end times are supported. Nevertheless the API is designed to be easily extendable, by adding new classes for other resources. All "heavy lifting" is done in the `ReclaimModel` class, which is the base class for all other models.
 
 ### Creating a task
 ```python
@@ -59,10 +59,6 @@ task.due_date = datetime.now() + timedelta(days=5)
 
 # Then the object needs to be saved manually to the API.
 task.save()
-
-# If you want to let Reclaim.ai the priorities according to the due date, you can do so by triggering the auto prioritize method.
-
-ReclaimTask.prioritize_by_due()
 ```
 
 ### Updating and searching tasks
@@ -96,6 +92,34 @@ task = ReclaimTask.get(12345)
 
 # Delete the task
 task.delete()
+```
+
+### Prioritizing tasks
+```python
+from reclaim_sdk.models.task import ReclaimTask
+
+# Get the desired tasks
+task = ReclaimTask.get(12345)
+
+# Prioritize one task on top of all the other
+task.prioritize()
+
+# Prioritize the tasks by due date
+# (Sorts the tasks by due date and sets the priorities accordingly)
+ReclaimTask.prioritize_by_due()
+```
+
+### Change start and end date for task events
+```python
+from reclaim_sdk.models.task import ReclaimTask
+
+# Get the desired task
+task = ReclaimTask.get(12345)
+
+# Adding one hour to the end date of the first event
+# (so the event gets 1 hour longer)
+with task.events[0] as event:
+    event.end = event.end + timedelta(hours=1)
 ```
 
 ## Contributing

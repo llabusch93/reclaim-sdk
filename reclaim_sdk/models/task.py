@@ -2,6 +2,7 @@ from datetime import datetime
 
 from reclaim_sdk.client import ReclaimAPICall
 from reclaim_sdk.models.model import ReclaimModel
+from reclaim_sdk.models.task_event import ReclaimTaskEvent
 from reclaim_sdk.utils import from_datetime, to_datetime
 
 
@@ -25,6 +26,10 @@ class ReclaimTask(ReclaimModel):
         ("maxChunkSize", 8),  # Defaults to 2 hours
         ("timeChunksRequired", 8),  # Defaults to 2 hours
     ]
+
+    @property
+    def id(self):
+        return self._data.get("id", None)
 
     @property
     def name(self) -> str:
@@ -178,11 +183,34 @@ class ReclaimTask(ReclaimModel):
         self["timeChunksRequired"] = self._convert_to_timechunks(hours)
 
     @property
-    def instances(self) -> list:
+    def priority(self) -> int:
         """
-        Gets the instances of the task.
+        Gets the priority of the task. A lower value means higher priority.
         """
-        return self["instances"]
+        return self["index"]
+
+    @priority.setter
+    def priority(self, value: int) -> None:
+        """
+        Sets the priority of the task. A lower value means higher priority.
+        """
+        self["index"] = value
+
+    @property
+    def events(self) -> list:
+        """
+        Parses and sets the task events, sorted by start date.
+        """
+        if not self["instances"]:
+            return []
+
+        events = []
+        for event in self["instances"]:
+            events.append(ReclaimTaskEvent(event, self))
+
+        events = sorted(events, key=lambda x: x.start)
+
+        return events
 
     @property
     def scheduled_start_date(self) -> datetime:
@@ -192,16 +220,10 @@ class ReclaimTask(ReclaimModel):
         scheduled to start in the Reclaim.ai planner.
         The timezone is UTC.
         """
-        if not self.is_scheduled or not self.instances:
+        if not self.events:
             return None
 
-        # Sort the instances by start date
-        instances = sorted(self.instances, key=lambda x: x["start"])
-        # Get the first instance
-        instance = instances[0]
-        # Get the start date
-        start_date = instance["start"]
-        return to_datetime(start_date)
+        return self.events[0].start
 
     @property
     def scheduled_end_date(self) -> datetime:
@@ -211,16 +233,10 @@ class ReclaimTask(ReclaimModel):
         scheduled to end in the Reclaim.ai planner.
         The timezone is UTC.
         """
-        if not self.is_scheduled or not self.instances:
+        if not self.events:
             return None
 
-        # Sort the instances by end date
-        instances = sorted(self.instances, key=lambda x: x["end"])
-        # Get the last instance
-        instance = instances[-1]
-        # Get the end date
-        end_date = instance["end"]
-        return to_datetime(end_date)
+        return self.events[0].end
 
     def mark_complete(self) -> None:
         """
@@ -252,5 +268,14 @@ class ReclaimTask(ReclaimModel):
         """
         with ReclaimAPICall(cls) as client:
             url = f"{client._api_url}/api/tasks/reindex-by-due"
+            res = client.post(url)
+            res.raise_for_status()
+
+    def prioritize(self) -> None:
+        """
+        Sets the task on top of the task list.
+        """
+        with ReclaimAPICall(self) as client:
+            url = f"{client._api_url}/api/planner/prioritize/task/{self.id}"
             res = client.post(url)
             res.raise_for_status()
