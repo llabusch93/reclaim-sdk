@@ -13,7 +13,7 @@ pip install reclaim-sdk
 ```
 
 ## Configuration
-The only configuration needed is the token. You can get it from the Reclaim.ai web app, by copying it from the browser's developer tools. It's stored in the cookie named `RECLAIM`.
+You can get an API key from [here](https://app.reclaim.ai/settings/developer).
 
 There are 3 ways to configure the token:
 
