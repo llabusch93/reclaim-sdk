@@ -4,6 +4,8 @@ from os import environ
 import toml
 from httpx import Client, HTTPStatusError
 from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord
+from typing import Optional
+
 
 CONF_FILE = pathlib.Path("~/.reclaim.toml").expanduser()
 
@@ -20,14 +22,14 @@ class ReclaimClient(Client):
 
     @property
     def is_authenticated(self):
-        return "RECLAIM" in self.cookies
+        return self._token is not None
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, token="", **kwargs):
+    def __init__(self, token: Optional[str] = None, **kwargs):
         super().__init__(base_url=self._api_url, http2=True)
 
         if token:
@@ -43,16 +45,10 @@ class ReclaimClient(Client):
                 raise KeyError(f"Token not found in {CONF_FILE}.")
 
         if self._token:
-            self.authenticate(self._token)
+            self.headers["Authorization"] = f"Bearer {self._token}"
 
         else:
-            raise ValueError("No Reclaim.ai token provided.")
-
-    def authenticate(self):
-        """
-        Authenticate the client with the given token.
-        """
-        self.cookies.set("RECLAIM", self._token)
+            raise ValueError("No Reclaim API token provided.")
 
 
 class ReclaimAPICall(object):
@@ -77,9 +73,7 @@ class ReclaimAPICall(object):
         return self.client
 
     def __exit__(self, exc_type, exc_value, traceback):
-
         if exc_type is HTTPStatusError:
-
             if exc_value.response.status_code == 404:
                 if self.object_id is not None:
                     id = self.object_id

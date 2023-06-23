@@ -1,13 +1,12 @@
-# reclaim-sdk - Unofficial Reclaim.ai Python SDK
+# Reclaim-SDK - Unofficial Python SDK for Reclaim.ai
 
-This is an unofficial Python SDK for the Reclaim.ai API. It is not affiliated with Reclaim.ai in any way and was reverse engineered from the Reclaim.ai web app.
-That means there can be bugs and the API may change at any time, a versioning is not possible.
+Reclaim-SDK is an unofficial Python SDK for the Reclaim.ai API. It provides a simple and easy-to-use interface for managing tasks in Reclaim.ai. Please note that this SDK is not affiliated with Reclaim.ai in any way and was reverse-engineered from the Reclaim.ai web app. As a result, there may be bugs and the API may change at any time, and versioning is not possible.
 
 ## Features
-**Currently only task management is supported**. As there might be an official SDK in the future, this SDK won't implement all features of the web app.
+Currently, Reclaim-SDK only supports task management. However, as there might be an official SDK in the future, this SDK won't implement all features of the web app. 
 
 ## Installation
-
+To install Reclaim-SDK, simply run the following command:
 ```bash
 pip install reclaim-sdk
 ```
