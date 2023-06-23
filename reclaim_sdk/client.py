@@ -48,7 +48,7 @@ class ReclaimClient(Client):
         else:
             raise ValueError("No Reclaim.ai token provided.")
 
-    def authenticate(self, token):
+    def authenticate(self):
         """
         Authenticate the client with the given token.
         """

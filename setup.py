@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="reclaim-sdk",
-    version="0.4.0",
+    version="0.4.1",
     description="Unofficial Reclaim.ai Python API",
     long_description=long_description,
     long_description_content_type="text/markdown",
