@@ -240,7 +240,7 @@ class ReclaimTask(ReclaimModel):
 
     def mark_complete(self) -> None:
         """
-        Marks the task as complete.
+        Marks the task as complete. Only works if task has no events scheduled.
         """
         with ReclaimAPICall(self) as client:
             url = f"{client._api_url}/api/planner/done/task/{self.id}"
