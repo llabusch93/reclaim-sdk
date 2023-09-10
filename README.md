@@ -80,6 +80,17 @@ tasks = ReclaimTask.search(title="My task")
 # If we have the task ID we can get the task directly
 task = ReclaimTask.get(12345)
 
+# Mark the task incomplete
+task.mark_incomplete()
+
+# Move start date to future to remove all events
+# This is needed to mark it complete if still scheduled
+task.start_date = "2050-01-01T07:00:00.000Z"
+task.due_date = "2050-01-31T17:00:00.000Z"
+
+# Mark the task complete
+task.mark_complete()
+
 ```
 
 ### Deleting tasks
