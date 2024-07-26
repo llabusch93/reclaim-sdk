@@ -1,92 +1,96 @@
-import pathlib
-from os import environ
+# reclaim_sdk/client.py
 
-import toml
-from httpx import Client, HTTPStatusError
-from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord
-from typing import Optional
-
-
-CONF_FILE = pathlib.Path("~/.reclaim.toml").expanduser()
-
-
-class ReclaimClient(Client):
-    """
-    The client is a singleton, so we can use it to store the token and
-    the API URL. It should be initialized in the main script once.
-    """
-
-    _instance = None
-    _token = None
-    _api_url = "https://api.app.reclaim.ai"
-
-    @property
-    def is_authenticated(self):
-        return self._token is not None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __init__(self, token: Optional[str] = None, **kwargs):
-        super().__init__(base_url=self._api_url, http2=True)
-
-        if token:
-            self._token = token
-
-        elif "RECLAIM_TOKEN" in environ:
-            self._token = environ["RECLAIM_TOKEN"]
-
-        elif CONF_FILE.exists():
-            try:
-                self._token = toml.load(CONF_FILE)["reclaim_ai"]["token"]
-            except KeyError:
-                raise KeyError(f"Token not found in {CONF_FILE}.")
-
-        if self._token:
-            self.headers["Authorization"] = f"Bearer {self._token}"
-
-        else:
-            raise ValueError("No Reclaim API token provided.")
+from pydantic import BaseModel, Field
+import os
+import json
+from datetime import datetime, timezone
+import httpx
+from typing import Any, Dict, Optional
+from reclaim_sdk.exceptions import (
+    ReclaimAPIError,
+    RecordNotFound,
+    InvalidRecord,
+    AuthenticationError,
+)
 
 
-class ReclaimAPICall(object):
-    """
-    Context manager for API calls to Reclaim.ai.
-    It will catch any HTTPError and raise a ReclaimAPIError instead.
-    """
+class ReclaimClientConfig(BaseModel):
+    token: str = Field(..., description="Reclaim API token")
+    base_url: str = Field(
+        "https://api.app.reclaim.ai", description="Reclaim API base URL"
+    )
 
-    def __init__(self, object, id=None, **kwargs):
-        """
-        Initialize the API call context manager.
 
-        :param object (ReclaimModel): The object to call the API on.
-        :param id (int): The ID of the object to call the API on.
-        :param kwargs: Additional keyword arguments to pass to the client.
-        """
-        self.object = object
-        self.object_id = id
-        self.client = ReclaimClient(**kwargs)
+class ReclaimClient:
+    def __init__(self, config: Optional[ReclaimClientConfig] = None):
+        if config is None:
+            token = os.environ.get("RECLAIM_TOKEN")
+            if not token:
+                raise ValueError("Reclaim token is required")
+            config = ReclaimClientConfig(token=token)
 
-    def __enter__(self):
-        return self.client
+        self.config = config
+        self.session = httpx.Client(
+            base_url=self.config.base_url,
+            headers={"Authorization": f"Bearer {self.config.token}"},
+        )
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        if exc_type is HTTPStatusError:
-            if exc_value.response.status_code == 404:
-                if self.object_id is not None:
-                    id = self.object_id
-                else:
-                    id = self.object.id
-                raise RecordNotFound(
-                    f"{self.object._name} with ID {id} not found."
+    def request(self, method: str, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        if "json" in kwargs:
+            kwargs["content"] = json.dumps(
+                kwargs.pop("json"), default=self._datetime_encoder
+            )
+            kwargs["headers"] = kwargs.get("headers", {})
+            kwargs["headers"]["Content-Type"] = "application/json"
+
+        try:
+            response = self.session.request(method, endpoint, **kwargs)
+            response.raise_for_status()
+            if (
+                method.upper() == "DELETE"
+                and response.status_code in (204, 200)
+                and not response.content
+            ):
+                return {}
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            error_data = (
+                e.response.json() if e.response.content else {"message": str(e)}
+            )
+            if e.response.status_code == 401:
+                raise AuthenticationError(
+                    f"Authentication failed: {error_data.get('message')}"
                 )
-
-            elif exc_value.response.status_code in (400, 422, 500):
-                raise InvalidRecord(
-                    f"The submitted {self.object._name} is invalid."
-                )
-
+            elif e.response.status_code == 404:
+                raise RecordNotFound(f"Resource not found: {endpoint}")
+            elif e.response.status_code in (400, 422):
+                raise InvalidRecord(f"Invalid data: {error_data.get('message')}")
             else:
-                raise exc_value
+                raise ReclaimAPIError(f"API error: {error_data.get('message')}")
+        except httpx.RequestError as e:
+            raise ReclaimAPIError(f"Request failed: {str(e)}")
+        except json.JSONDecodeError:
+            raise ReclaimAPIError("Invalid JSON response from API")
+
+    @staticmethod
+    def _datetime_encoder(obj: Any) -> str:
+        if isinstance(obj, datetime):
+            return obj.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        raise TypeError(
+            f"Object of type {obj.__class__.__name__} is not JSON serializable"
+        )
+
+    def get(self, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        return self.request("GET", endpoint, **kwargs)
+
+    def post(self, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        return self.request("POST", endpoint, **kwargs)
+
+    def put(self, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        return self.request("PUT", endpoint, **kwargs)
+
+    def delete(self, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        return self.request("DELETE", endpoint, **kwargs)
+
+    def patch(self, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
+        return self.request("PATCH", endpoint, **kwargs)

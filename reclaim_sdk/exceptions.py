@@ -1,16 +1,14 @@
 class ReclaimAPIError(Exception):
-    """
-    Base class for Reclaim.ai API errors.
-    """
-
-    ...
+    """Base exception for Reclaim API errors"""
 
 
 class RecordNotFound(ReclaimAPIError):
-    def __init__(self, message):
-        self.message = message
+    """Raised when a requested resource is not found"""
 
 
 class InvalidRecord(ReclaimAPIError):
-    def __init__(self, message):
-        self.message = message
+    """Raised when invalid data is submitted to the API"""
+
+
+class AuthenticationError(ReclaimAPIError):
+    """Raised when there's an authentication problem"""
