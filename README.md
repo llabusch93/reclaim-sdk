@@ -1,16 +1,18 @@
-# Reclaim-SDK - Unofficial Python SDK for Reclaim.ai
+# reclaim-sdk - Python SDK for Reclaim.ai
 
 ⚠️ **WARNING: Major Changes in Version 0.5+** ⚠️
 
-The codebase has undergone significant changes from version 0.5 onwards. These changes introduce breaking changes that may affect existing implementations. Please review the documentation carefully when upgrading from earlier versions.
+The codebase has undergone substantial modifications starting from version 0.5. These updates introduce breaking changes that may impact existing implementations. Please consult the documentation thoroughly before upgrading from earlier versions.
 
-Reclaim-SDK is an unofficial Python SDK for the Reclaim.ai API. It provides a simple and easy-to-use interface for managing tasks in Reclaim.ai. Please note that this SDK is not affiliated with Reclaim.ai in any way and was reverse-engineered from the Reclaim.ai web app and [using the Swagger Spec](https://api.app.reclaim.ai/swagger/reclaim-api-0.1.yml), thanks to AJ from Reclaim.ai to provide that! As a result, there may be bugs and the API may change at any time, and versioning is not guaranteed to be stable.
+reclaim-sdk is a Python SDK designed for the Reclaim.ai API. It offers a straightforward and developer-friendly interface for managing tasks within Reclaim.ai. Please note that this SDK is not officially affiliated with Reclaim.ai and has been reverse-engineered from the Reclaim.ai web app, as well as utilizing the Swagger Spec provided by AJ from Reclaim.ai =>[Swagger Spec](https://api.app.reclaim.ai/swagger/reclaim-api-0.1.yml). Consequently, there may be bugs, and the API is subject to change without notice. Version stability is not guaranteed.
 
 ## Features
-Currently, Reclaim-SDK only supports task management. However, as there might be an official SDK in the future, this SDK won't implement all features of the web app. 
+At present, reclaim-sdk exclusively supports task management. Its primary function is to integrate various tools with Reclaim.ai, enabling the efficient handling of tasks from project management, calendars, and similar applications within Reclaim.ai. For other features, such as managing habits or custom hours, users should utilize the Reclaim.ai web app directly.
+
+**If something is missing for you, please open an issue or a pull request.**
 
 ## Installation
-To install Reclaim-SDK, simply run the following command:
+To install reclaim-sdk, simply run the following command:
 ```bash
 pip install reclaim-sdk
 ```
@@ -36,93 +38,12 @@ There are now two ways to configure the SDK with your API key:
 The `configure` method allows you to set up the client with your API token (and optionally a base URL) at any point in your code before making API calls.
 
 ## Usage
-The SDK uses Pydantic models for better type checking and data validation. Here's an example of how to use the Task resource:
+The SDK uses Pydantic models for better type checking and data validation. Please refer to code examples below:
 
-### Creating a task
-```python
-from reclaim_sdk.resources.task import Task
-from datetime import datetime, timedelta
-
-# Create a new task
-task = Task(
-    title="My new task",
-    due=datetime.now() + timedelta(days=5),
-    priority="P1"
-)
-
-# Set durations
-task.duration = 5
-task.min_work_duration = 0.75
-task.max_work_duration = 2
-
-# Save the task
-task.save()
-```
-
-### Updating tasks
-```python
-# Update task properties
-task.notes = "Updated description"
-task.save()
-
-# Add time to the task
-task.add_time(0.5)  # Add 30 minutes
-
-# Set the task to be in the up next list
-task.up_next = True
-task.save()
-```
-
-### Task operations
-```python
-# Start the task
-task.start()
-
-# Log work on the task
-task.log_work(60, datetime.now())
-
-# Stop the task
-task.stop()
-
-# Mark the task as complete
-task.mark_complete()
-
-# Mark the task as incomplete
-task.mark_incomplete()
-```
-
-### Listing tasks
-```python
-# List all tasks
-all_tasks = Task.list()
-```
-
-### Deleting tasks
-```python
-# Delete a task
-task.delete()
-```
-
-## Error Handling
-The SDK provides specific exceptions for better error handling:
-
-```python
-from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord, AuthenticationError, ReclaimAPIError
-
-try:
-    # Your code here
-except RecordNotFound as e:
-    print(f"Record not found: {e}")
-except InvalidRecord as e:
-    print(f"Invalid record: {e}")
-except AuthenticationError as e:
-    print(f"Authentication error: {e}")
-except ReclaimAPIError as e:
-    print(f"API error: {e}")
-```
+- [Task Management](/examples/task_management.py)
 
 ## Contributing
-Contributions are welcome. Please open an issue or a pull request. If you want to add a new resource, please have a look at the `BaseResource` class and the `Task` class. The `Task` class is a good example of how to implement a new resource.
+Contributions are welcome. Please open an issue or a pull request. If you want to add a new resource, please have a look at the [`BaseResource` class](/reclaim_sdk/resources/base.py). The [`Task` class](/reclaim_sdk/resources/task.py) is a good example of how to implement a new resource. Reference the [Swagger Spec](https://api.app.reclaim.ai/swagger/reclaim-api-0.1.yml) for the available endpoints and also use the network tab in the browser to see the request and response payloads, as the Swagger Spec may not always be up-to-date or complete.
 
 ## License
 [MIT License](https://choosealicense.com/licenses/mit/)

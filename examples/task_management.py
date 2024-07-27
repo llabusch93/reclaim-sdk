@@ -48,9 +48,6 @@ try:
     # Stop the task
     task.stop()
 
-    # Move a task event after refresh
-    task.refresh()
-
     # Mark the task as complete
     task.mark_complete()
 
