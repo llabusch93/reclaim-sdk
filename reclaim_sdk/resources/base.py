@@ -14,6 +14,11 @@ class BaseResource(BaseModel):
     updated: datetime | None = Field(None, description="Last update timestamp")
 
     ENDPOINT: ClassVar[str] = ""
+    _client: ReclaimClient
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._client = ReclaimClient()
 
     @classmethod
     def from_api_data(cls: Type[T], data: Dict) -> T:

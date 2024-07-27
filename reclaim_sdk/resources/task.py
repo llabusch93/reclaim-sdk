@@ -1,11 +1,9 @@
-# reclaim_sdk/resources/task.py
-
+from __future__ import annotations
 from pydantic import Field, field_validator
 from datetime import datetime
 from typing import ClassVar, Optional
 from enum import Enum
 from reclaim_sdk.resources.base import BaseResource
-from reclaim_sdk.client import ReclaimClient
 
 
 class PriorityEnum(str, Enum):
@@ -84,57 +82,46 @@ class Task(BaseResource):
         self.onDeck = value
 
     def mark_complete(self) -> None:
-        client = ReclaimClient()
-        response = client.post(f"/api/planner/done/task/{self.id}")
+        response = self._client.post(f"/api/planner/done/task/{self.id}")
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     def mark_incomplete(self) -> None:
-        client = ReclaimClient()
-        response = client.post(f"/api/planner/unarchive/task/{self.id}")
+        response = self._client.post(f"/api/planner/unarchive/task/{self.id}")
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     @classmethod
     def prioritize_by_due(cls) -> None:
-        client = ReclaimClient()
-        client.patch("/api/tasks/reindex-by-due")
+        cls._client.patch("/api/tasks/reindex-by-due")
 
     def prioritize(self) -> None:
-        client = ReclaimClient()
-        client.post(f"/api/planner/prioritize/task/{self.id}")
-        self.update()
-
-    def update(self) -> None:
-        updated_task = self.get(self.id)
-        self.__dict__.update(updated_task.__dict__)
+        self._client.post(f"/api/planner/prioritize/task/{self.id}")
+        self.refresh()
 
     def add_time(self, hours: float) -> None:
         minutes = int(hours * 60)
         rounded_minutes = round(minutes / 15) * 15
-        client = ReclaimClient()
-        response = client.post(
+        response = self._client.post(
             f"/api/planner/add-time/task/{self.id}", params={"minutes": rounded_minutes}
         )
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     def clear_exceptions(self) -> None:
-        client = ReclaimClient()
-        response = client.post(f"/api/planner/clear-exceptions/task/{self.id}")
+        response = self._client.post(f"/api/planner/clear-exceptions/task/{self.id}")
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     def log_work(self, minutes: int, end: Optional[datetime] = None) -> None:
-        client = ReclaimClient()
         params = {"minutes": minutes}
         if end:
             params["end"] = end.isoformat()
-        response = client.post(f"/api/planner/log-work/task/{self.id}", params=params)
+        response = self._client.post(
+            f"/api/planner/log-work/task/{self.id}", params=params
+        )
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     def start(self) -> None:
-        client = ReclaimClient()
-        response = client.post(f"/api/planner/start/task/{self.id}")
+        response = self._client.post(f"/api/planner/start/task/{self.id}")
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
 
     def stop(self) -> None:
-        client = ReclaimClient()
-        response = client.post(f"/api/planner/stop/task/{self.id}")
+        response = self._client.post(f"/api/planner/stop/task/{self.id}")
         self.__dict__.update(self.from_api_data(response["taskOrHabit"]).__dict__)
