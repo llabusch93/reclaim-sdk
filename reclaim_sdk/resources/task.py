@@ -22,13 +22,21 @@ class TaskStatus(str, Enum):
     ARCHIVED = "ARCHIVED"
 
 
+class EventCategory(str, Enum):
+    WORK = "WORK"
+    PERSONAL = "PERSONAL"
+
+
 class Task(BaseResource):
     ENDPOINT: ClassVar[str] = "/api/tasks"
 
     title: Optional[str] = Field(None, description="Task title")
     notes: Optional[str] = Field(None, description="Task notes")
-    eventCategory: str = Field("WORK", description="Event category")
+    eventCategory: EventCategory = Field(
+        default=EventCategory.WORK, description="Event category"
+    )
     eventSubType: Optional[str] = Field(None, description="Event subtype")
+    timeSchemeId: Optional[str] = Field(None, description="Time scheme ID (custom hours)")
     timeChunksRequired: Optional[int] = Field(None, description="Time chunks required")
     minChunkSize: Optional[int] = Field(None, description="Minimum chunk size")
     maxChunkSize: Optional[int] = Field(None, description="Maximum chunk size")
