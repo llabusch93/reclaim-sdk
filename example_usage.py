@@ -1,4 +1,5 @@
 from reclaim_sdk.resources.task import Task
+from reclaim_sdk.resources.hours import Hours
 from reclaim_sdk.exceptions import (
     RecordNotFound,
     InvalidRecord,
@@ -22,8 +23,13 @@ try:
     task.min_work_duration = 0.5
     task.save()
 
-    # Update the task
+    # Update the description
     task.notes = "Updated description"
+    task.save()
+
+    # Change the task to use custom hour scheme
+    all_hours = Hours.list()
+    task.timeSchemeId = all_hours[2].id
     task.save()
 
     # Add time to the task

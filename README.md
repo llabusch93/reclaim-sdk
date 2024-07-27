@@ -18,16 +18,25 @@ pip install reclaim-sdk
 ## Configuration
 You can get an API key from [here](https://app.reclaim.ai/settings/developer).
 
-The SDK expects the API key to be passed in the `RECLAIM_TOKEN` environment variable. If you don't want to use environment variables, upfront, you can set the environment variable in your code:
+There are now two ways to configure the SDK with your API key:
 
-```python
-import os
+1. Using the `RECLAIM_TOKEN` environment variable:
+   ```python
+   import os
+   os.environ["RECLAIM_TOKEN"] = "YOUR_API_KEY"
+   ```
 
-os.environ["RECLAIM_TOKEN"] = "YOUR_API_KEY"
-```
+2. Using the new `configure` method:
+   ```python
+   from reclaim_sdk.client import ReclaimClient
+   
+   ReclaimClient.configure(token="YOUR_API_KEY")
+   ```
+
+The `configure` method allows you to set up the client with your API token (and optionally a base URL) at any point in your code before making API calls.
 
 ## Usage
-The SDK now uses Pydantic models for better type checking and data validation. Here's an example of how to use the new Task resource:
+The SDK uses Pydantic models for better type checking and data validation. Here's an example of how to use the Task resource:
 
 ### Creating a task
 ```python
@@ -95,7 +104,7 @@ task.delete()
 ```
 
 ## Error Handling
-The SDK now provides more specific exceptions for better error handling:
+The SDK provides specific exceptions for better error handling:
 
 ```python
 from reclaim_sdk.exceptions import RecordNotFound, InvalidRecord, AuthenticationError, ReclaimAPIError

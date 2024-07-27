@@ -1,5 +1,3 @@
-# reclaim_sdk/client.py
-
 from pydantic import BaseModel, Field
 import os
 import json
@@ -22,18 +20,38 @@ class ReclaimClientConfig(BaseModel):
 
 
 class ReclaimClient:
-    def __init__(self, config: Optional[ReclaimClientConfig] = None):
-        if config is None:
+    _instance: Optional["ReclaimClient"] = None
+    _config: Optional[ReclaimClientConfig] = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialize()
+        return cls._instance
+
+    def _initialize(self) -> None:
+        if self._config is None:
             token = os.environ.get("RECLAIM_TOKEN")
             if not token:
-                raise ValueError("Reclaim token is required")
-            config = ReclaimClientConfig(token=token)
+                raise ValueError(
+                    "Reclaim token is required. Use ReclaimClient.configure() or set RECLAIM_TOKEN environment variable."
+                )
+            self._config = ReclaimClientConfig(token=token)
 
-        self.config = config
         self.session = httpx.Client(
-            base_url=self.config.base_url,
-            headers={"Authorization": f"Bearer {self.config.token}"},
+            base_url=self._config.base_url,
+            headers={"Authorization": f"Bearer {self._config.token}"},
         )
+
+    @classmethod
+    def configure(cls, token: str, base_url: Optional[str] = None) -> None:
+        """Configure the ReclaimClient with the given token and optional base URL."""
+        config = ReclaimClientConfig(token=token)
+        if base_url:
+            config.base_url = base_url
+        cls._config = config
+        if cls._instance:
+            cls._instance._initialize()
 
     def request(self, method: str, endpoint: str, **kwargs: Any) -> Dict[str, Any]:
         if "json" in kwargs:
