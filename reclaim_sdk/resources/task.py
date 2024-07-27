@@ -1,4 +1,3 @@
-from __future__ import annotations
 from pydantic import Field, field_validator
 from datetime import datetime
 from typing import ClassVar, Optional
@@ -32,24 +31,38 @@ class Task(BaseResource):
 
     title: Optional[str] = Field(None, description="Task title")
     notes: Optional[str] = Field(None, description="Task notes")
-    eventCategory: EventCategory = Field(
-        default=EventCategory.WORK, description="Event category"
+    event_category: EventCategory = Field(
+        default=EventCategory.WORK, alias="eventCategory", description="Event category"
     )
-    eventSubType: Optional[str] = Field(None, description="Event subtype")
-    timeSchemeId: Optional[str] = Field(None, description="Time scheme ID (custom hours)")
-    timeChunksRequired: Optional[int] = Field(None, description="Time chunks required")
-    minChunkSize: Optional[int] = Field(None, description="Minimum chunk size")
-    maxChunkSize: Optional[int] = Field(None, description="Maximum chunk size")
+    event_sub_type: Optional[str] = Field(
+        None, alias="eventSubType", description="Event subtype"
+    )
+    time_scheme_id: Optional[str] = Field(
+        None, alias="timeSchemeId", description="Time scheme ID (custom hours)"
+    )
+    time_chunks_required: Optional[int] = Field(
+        None, alias="timeChunksRequired", description="Time chunks required"
+    )
+    min_chunk_size: Optional[int] = Field(
+        None, alias="minChunkSize", description="Minimum chunk size"
+    )
+    max_chunk_size: Optional[int] = Field(
+        None, alias="maxChunkSize", description="Maximum chunk size"
+    )
     priority: PriorityEnum = Field(None, description="Task priority")
-    onDeck: bool = Field(False, description="Task is on deck")
-    alwaysPrivate: bool = Field(False, description="Task is always private")
+    on_deck: bool = Field(False, alias="onDeck", description="Task is on deck")
+    always_private: bool = Field(
+        False, alias="alwaysPrivate", description="Task is always private"
+    )
     status: Optional[TaskStatus] = Field(None, description="Task status")
     due: Optional[datetime] = Field(None, description="Due date")
-    snoozeUntil: Optional[datetime] = Field(None, description="Snooze until date")
+    snooze_until: Optional[datetime] = Field(
+        None, alias="snoozeUntil", description="Snooze until date"
+    )
     index: Optional[float] = Field(None, description="Task index")
 
     @field_validator(
-        "timeChunksRequired", "minChunkSize", "maxChunkSize", mode="before"
+        "time_chunks_required", "min_chunk_size", "max_chunk_size", mode="before"
     )
     @classmethod
     def validate_chunks(cls, v):
@@ -59,35 +72,35 @@ class Task(BaseResource):
 
     @property
     def duration(self) -> Optional[float]:
-        return self.timeChunksRequired / 4 if self.timeChunksRequired else None
+        return self.time_chunks_required / 4 if self.time_chunks_required else None
 
     @duration.setter
     def duration(self, hours: float) -> None:
-        self.timeChunksRequired = int(hours * 4)
+        self.time_chunks_required = int(hours * 4)
 
     @property
     def min_work_duration(self) -> Optional[float]:
-        return self.minChunkSize / 4 if self.minChunkSize else None
+        return self.min_chunk_size / 4 if self.min_chunk_size else None
 
     @min_work_duration.setter
     def min_work_duration(self, hours: float) -> None:
-        self.minChunkSize = int(hours * 4)
+        self.min_chunk_size = int(hours * 4)
 
     @property
     def max_work_duration(self) -> Optional[float]:
-        return self.maxChunkSize / 4 if self.maxChunkSize else None
+        return self.max_chunk_size / 4 if self.max_chunk_size else None
 
     @max_work_duration.setter
     def max_work_duration(self, hours: float) -> None:
-        self.maxChunkSize = int(hours * 4)
+        self.max_chunk_size = int(hours * 4)
 
     @property
     def up_next(self) -> bool:
-        return self.onDeck
+        return self.on_deck
 
     @up_next.setter
     def up_next(self, value: bool) -> None:
-        self.onDeck = value
+        self.on_deck = value
 
     def mark_complete(self) -> None:
         response = self._client.post(f"/api/planner/done/task/{self.id}")
