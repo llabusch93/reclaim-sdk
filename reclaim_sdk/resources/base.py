@@ -1,5 +1,3 @@
-# reclaim_sdk/resources/base.py
-
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import ClassVar, Dict, List, Type, TypeVar
@@ -25,7 +23,7 @@ class BaseResource(BaseModel):
         return cls(**data)
 
     def to_api_data(self) -> Dict:
-        return self.model_dump(exclude_unset=False)
+        return self.model_dump(exclude_unset=False, by_alias=True)
 
     @classmethod
     def get(cls: Type[T], id: int) -> T:

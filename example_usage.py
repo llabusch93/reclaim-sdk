@@ -29,7 +29,7 @@ try:
 
     # Change the task to use custom hour scheme
     all_hours = Hours.list()
-    task.timeSchemeId = all_hours[2].id
+    task.time_scheme_id = all_hours[2].id
     task.save()
 
     # Add time to the task
