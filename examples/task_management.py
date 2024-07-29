@@ -1,4 +1,4 @@
-from reclaim_sdk.resources.task import Task
+from reclaim_sdk.resources.task import Task, TaskPriority, EventColor
 from reclaim_sdk.resources.hours import Hours
 from reclaim_sdk.exceptions import (
     RecordNotFound,
@@ -13,7 +13,7 @@ try:
     task = Task(
         title="My new task",
         due=datetime(2023, 12, 31),
-        priority="P1",
+        priority=TaskPriority.P3,
     )
 
     # Those are set via properties, so we can't set them directly
@@ -25,6 +25,7 @@ try:
 
     # Update the description
     task.notes = "Updated description"
+    task.event_color = EventColor.BANANA
     task.save()
 
     # Change the task to use custom hour scheme
