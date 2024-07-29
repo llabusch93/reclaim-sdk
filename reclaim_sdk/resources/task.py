@@ -5,11 +5,26 @@ from enum import Enum
 from reclaim_sdk.resources.base import BaseResource
 
 
-class PriorityEnum(str, Enum):
+class TaskPriority(str, Enum):
     P1 = "P1"
     P2 = "P2"
     P3 = "P3"
     P4 = "P4"
+
+
+class EventColor(str, Enum):
+    NONE = "NONE"
+    LAVENDER = "LAVENDER"
+    SAGE = "SAGE"
+    GRAPE = "GRAPE"
+    FLAMINGO = "FLAMINGO"
+    BANANA = "BANANA"
+    TANGERINE = "TANGERINE"
+    PEACOCK = "PEACOCK"
+    GRAPHITE = "GRAPHITE"
+    BLUEBERRY = "BLUEBERRY"
+    BASIL = "BASIL"
+    TOMATO = "TOMATO"
 
 
 class TaskStatus(str, Enum):
@@ -49,7 +64,7 @@ class Task(BaseResource):
     max_chunk_size: Optional[int] = Field(
         None, alias="maxChunkSize", description="Maximum chunk size"
     )
-    priority: PriorityEnum = Field(None, description="Task priority")
+    priority: TaskPriority = Field(None, description="Task priority")
     on_deck: bool = Field(False, alias="onDeck", description="Task is on deck")
     always_private: bool = Field(
         False, alias="alwaysPrivate", description="Task is always private"
@@ -60,6 +75,7 @@ class Task(BaseResource):
         None, alias="snoozeUntil", description="Snooze until date"
     )
     index: Optional[float] = Field(None, description="Task index")
+    event_color: EventColor = Field(None, alias="eventColor", description="Event color")
 
     @field_validator(
         "time_chunks_required", "min_chunk_size", "max_chunk_size", mode="before"
