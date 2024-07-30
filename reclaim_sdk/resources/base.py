@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import ClassVar, Dict, List, Type, TypeVar
 from reclaim_sdk.client import ReclaimClient
@@ -7,6 +7,8 @@ T = TypeVar("T", bound="BaseResource")
 
 
 class BaseResource(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     id: int | None = Field(None, description="Unique identifier of the resource")
     created: datetime | None = Field(None, description="Creation timestamp")
     updated: datetime | None = Field(None, description="Last update timestamp")

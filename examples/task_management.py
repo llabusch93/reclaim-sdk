@@ -23,14 +23,14 @@ try:
     task.min_work_duration = 0.5
     task.save()
 
-    # Update the description
-    task.notes = "Updated description"
-    task.event_color = EventColor.BANANA
-    task.save()
-
     # Change the task to use custom hour scheme
     all_hours = Hours.list()
     task.time_scheme_id = all_hours[2].id
+    task.save()
+
+    # Update the description
+    task.notes = "Updated description"
+    task.event_color = EventColor.BANANA
     task.save()
 
     # Add time to the task
@@ -39,6 +39,9 @@ try:
     # Set the task to be in the up next list
     task.up_next = True
     task.save()
+
+    # Reschedule the first task event
+    task_events = ...
 
     # Start the task
     task.start()

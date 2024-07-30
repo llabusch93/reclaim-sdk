@@ -1,8 +1,14 @@
 from pydantic import Field, field_validator
+
 from datetime import datetime
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, List, TYPE_CHECKING
 from enum import Enum
-from reclaim_sdk.resources.base import BaseResource
+from .base import BaseResource
+from .task_event import TaskEvent
+
+
+if TYPE_CHECKING:
+    from .task_event import TaskEvent
 
 
 class TaskPriority(str, Enum):
@@ -44,6 +50,7 @@ class EventCategory(str, Enum):
 class Task(BaseResource):
     ENDPOINT: ClassVar[str] = "/api/tasks"
 
+    id: Optional[int] = Field(None, description="Task ID")
     title: Optional[str] = Field(None, description="Task title")
     notes: Optional[str] = Field(None, description="Task notes")
     event_category: EventCategory = Field(
@@ -76,6 +83,7 @@ class Task(BaseResource):
     )
     index: Optional[float] = Field(None, description="Task index")
     event_color: EventColor = Field(None, alias="eventColor", description="Event color")
+    events: List["TaskEvent"] = Field([], alias="instances", description="Task events")
 
     @field_validator(
         "time_chunks_required", "min_chunk_size", "max_chunk_size", mode="before"
