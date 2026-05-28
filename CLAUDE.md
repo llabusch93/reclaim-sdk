@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Unofficial Python SDK for the Reclaim.ai API (reverse-engineered from the web app + partial Swagger spec at `https://api.app.reclaim.ai/swagger/reclaim-api-0.1.yml`). Distributed on PyPI as `reclaim-sdk`. Version lives in `reclaim_sdk/__init__.py` (single source — `setup.py` reads it via regex).
 
-Covers Tasks, DailyHabits, Hours (full CRUD on `/api/timeschemes` — custom working-hour profiles), Webhooks, Changelog. Many other Reclaim resources (Events, Calendars, Smart Habits/Meetings, Scheduling Links, etc.) remain unimplemented — see README "Not covered".
+Covers Tasks, DailyHabits, Hours (full CRUD on `/api/timeschemes` — custom working-hour profiles), Webhooks, Changelog, Smart Meetings (full CRUD, planner actions, series detection, convert from events). Many other Reclaim resources (Events, Calendars, Scheduling Links, One-on-Ones, Analytics, Focus Settings, Integrations, API-key management, Admin/Delegated access) remain unimplemented — see README "Not covered".
 
 ## Common commands
 

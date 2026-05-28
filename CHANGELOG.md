@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.9.0 — 2026-05-28
+
+### Added
+
+**Smart Meetings — full CRUD against `/api/smart-meetings`:**
+- `SmartMeeting` resource with `create()`, `get()`, `list()`, `update()` (PATCH), `delete()`
+- New models: `CreateSmartMeetingRequest`, `PatchSmartMeetingRequest`, `Organizer`, `RecurrenceDefinition`, `SmartSeriesView`, `SmartSeriesAttendee`, `SmartSeriesPeriodView`, `SmartSeriesActionPlannedResult`, `AttendeeInfo`, `TimezoneInfo`, `ConferenceDetails`
+- New enums: `SmartSeriesEventType`, `DefenseAggression`, `SmartSeriesVisibility`, `ConferenceType`, `SmartSeriesDependencyType`, `SmartSeriesBookingFailurePolicy`, `SmartSeriesAttendeeResponseStatus`, `SmartSeriesStatus`, `SmartSeriesRecurrenceType`, `Frequency`, `TimePolicyType`
+- Planner actions: `lock()`, `unlock()`, `skip()`, `reschedule()`, `move(start, end)`, `clear_exceptions()`
+- `Changelog.smart_meetings()` — list via `lineageIds` query param
+
+### Fixed
+
+- `Changelog.smart_meetings()` now uses `lineageIds` (not `ids`) query parameter
+- `SmartSeriesPeriodView.changes` accepts both `dict` and `list` (API returns `[]` in some responses)
+
 ## 0.8.0 — 2026-05-07
 
 ### Breaking Changes

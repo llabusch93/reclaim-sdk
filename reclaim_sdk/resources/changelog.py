@@ -45,7 +45,7 @@ class Changelog:
     @staticmethod
     def smart_meetings(ids: list[int], client=None) -> list[ChangeLogEntryView]:
         data = _client_or_default(client).get(
-            "/api/changelog/smart-meetings", params={"ids": ids}
+            "/api/changelog/smart-meetings", params={"lineageIds": ids}
         )
         return [ChangeLogEntryView.model_validate(x) for x in (data or [])]
 

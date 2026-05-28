@@ -17,6 +17,7 @@ As of 0.7.0, reclaim-sdk covers:
 - **Hours** — full CRUD on time schemes (custom day-hour intervals, `policyType`, features, target calendar)
 - **Webhooks** — subscribe to task/habit events, typed payload models (`TaskWebhookEvent`, `HabitWebhookEvent`), HMAC-SHA256 signature verification
 - **Changelog** — read change feeds for tasks, events, habits, meetings, scheduling links
+- **Smart Meetings** — full CRUD, planner actions (lock/unlock/skip/reschedule/move/clear-exceptions), series detection, convert from events
 
 Not covered: Events, Calendars, Scheduling Links, One-on-Ones, Analytics, Focus Settings, Integrations, API-key management, Admin/Delegated access. Use the Reclaim web app or open an issue/PR.
 

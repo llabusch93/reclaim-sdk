@@ -127,3 +127,132 @@ class EventSubType(str, Enum):
     ERRAND = "ERRAND"
     OTHER_PERSONAL = "OTHER_PERSONAL"
     UNKNOWN = "UNKNOWN"
+
+
+class SmartSeriesEventType(str, Enum):
+    """Event type for smart meeting series.
+
+    Values match the Reclaim Swagger ``SmartSeriesEventType`` schema.
+    """
+
+    PERSONAL = "PERSONAL"
+    SOLO_WORK = "SOLO_WORK"
+    EXTERNAL_MEETING = "EXTERNAL_MEETING"
+    FOCUS = "FOCUS"
+    TEAM_MEETING = "TEAM_MEETING"
+    ONE_ON_ONE = "ONE_ON_ONE"
+
+
+class DefenseAggression(str, Enum):
+    """How aggressively Reclaim defends smart-meeting time blocks.
+
+    Values match the Reclaim Swagger ``DefenseAggression`` schema.
+    """
+
+    NONE = "NONE"
+    LOW = "LOW"
+    DEFAULT = "DEFAULT"
+    HIGH = "HIGH"
+    MAX = "MAX"
+
+
+class SmartSeriesVisibility(str, Enum):
+    """Visibility setting for smart-meeting series.
+
+    Values match the Reclaim Swagger ``SmartSeriesVisibility`` schema.
+    """
+
+    DEFAULT = "DEFAULT"
+    PRIVATE = "PRIVATE"
+    PUBLIC = "PUBLIC"
+
+
+class ConferenceType(str, Enum):
+    """Video conference provider for smart meetings.
+
+    Values match the Reclaim Swagger ``ConferenceType`` schema.
+    """
+
+    ZOOM = "ZOOM"
+    GOOGLE_MEET = "GOOGLE_MEET"
+    MICROSOFT_TEAMS = "MICROSOFT_TEAMS"
+    WEBEX = "WEBEX"
+    FACETIME = "FACETIME"
+    OTHER = "OTHER"
+
+
+class SmartSeriesDependencyType(str, Enum):
+    """Dependency type for smart-meeting series.
+
+    Values match the Reclaim Swagger ``SmartSeriesDependencyType`` schema.
+    """
+
+    NONE = "NONE"
+    TASK = "TASK"
+    HABIT = "HABIT"
+
+
+class SmartSeriesBookingFailurePolicy(str, Enum):
+    """What Reclaim does when it cannot book a smart-meeting instance.
+
+    Values match the Reclaim Swagger ``SmartSeriesBookingFailurePolicy`` schema.
+    """
+
+    LEAVE_LAST_OR_RETURN_TO_ORIGINAL = "LEAVE_LAST_OR_RETURN_TO_ORIGINAL"
+    LEAVE_LAST = "LEAVE_LAST"
+    RETURN_TO_ORIGINAL = "RETURN_TO_ORIGINAL"
+
+
+class SmartSeriesAttendeeResponseStatus(str, Enum):
+    """Attendee response status for smart meetings.
+
+    Values match the Reclaim Swagger ``SmartSeriesAttendeeResponseStatus`` schema.
+    """
+
+    NEEDS_ACTION = "NEEDS_ACTION"
+    ACCEPTED = "ACCEPTED"
+    TENTATIVE = "TENTATIVE"
+    DECLINED = "DECLINED"
+
+
+class SmartSeriesStatus(str, Enum):
+    """Lifecycle status of a smart-meeting series.
+
+    Values match the Reclaim Swagger ``SmartSeriesStatus`` schema.
+    """
+
+    ACTIVE = "ACTIVE"
+    DISABLED = "DISABLED"
+    ARCHIVED = "ARCHIVED"
+
+
+class SmartSeriesRecurrenceType(str, Enum):
+    """Recurrence type for a smart-meeting series.
+
+    Values match the Reclaim Swagger ``SmartSeriesRecurrenceType`` schema.
+    """
+
+    RECURRING_SERIES = "RECURRING_SERIES"
+    SINGLE_INSTANCE = "SINGLE_INSTANCE"
+
+
+class Frequency(str, Enum):
+    """Recurrence frequency.
+
+    Values match the Reclaim Swagger ``Frequency`` schema.
+    """
+
+    DAILY = "DAILY"
+    WEEKLY = "WEEKLY"
+    MONTHLY = "MONTHLY"
+
+
+class TimePolicyType(str, Enum):
+    """Time-policy type for organizers/attendees.
+
+    Values match the Reclaim Swagger ``TimePolicyType`` schema.
+    """
+
+    WORK = "WORK"
+    PERSONAL = "PERSONAL"
+    MEETING = "MEETING"

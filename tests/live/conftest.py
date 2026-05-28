@@ -18,12 +18,13 @@ def live_client():
 @pytest.fixture(scope="session")
 def tracked_ids():
     """Registry of resources created during the session. Cleaned up in finalizer."""
-    registry = {"tasks": [], "habits": [], "webhooks": []}
+    registry = {"tasks": [], "habits": [], "webhooks": [], "smart_meetings": []}
     yield registry
 
     from reclaim_sdk.resources.task import Task
     from reclaim_sdk.resources.habit import DailyHabit
     from reclaim_sdk.resources.webhook import Webhook
+    from reclaim_sdk.resources.smart_meeting import SmartMeeting
 
     errors = []
     for task_id in registry["tasks"]:
@@ -44,6 +45,11 @@ def tracked_ids():
             w.delete()
         except Exception as e:
             errors.append(f"webhook {wh_id}: {e}")
+    for sm_id in registry["smart_meetings"]:
+        try:
+            SmartMeeting.get(sm_id).delete()
+        except Exception as e:
+            errors.append(f"smart_meeting {sm_id}: {e}")
 
     # paranoid sweep
     try:
@@ -52,6 +58,14 @@ def tracked_ids():
                 t.delete()
     except Exception as e:
         errors.append(f"task sweep: {e}")
+
+    # sweep smart meetings by title prefix
+    try:
+        for sm in SmartMeeting.list():
+            if sm.active_series and sm.active_series.title and sm.active_series.title.startswith(SDK_LIVE_PREFIX):
+                sm.delete()
+    except Exception as e:
+        errors.append(f"smart_meeting sweep: {e}")
 
     if errors:
         raise RuntimeError("Live cleanup failures: " + "; ".join(errors))
